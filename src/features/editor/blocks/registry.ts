@@ -1,4 +1,6 @@
 import type { Block } from "@/types";
+import type { LucideIcon } from "lucide-react";
+import { LayoutTemplate, Type, Image, Grid3X3, Megaphone, Mail, HelpCircle, Quote } from "lucide-react";
 
 // ── Block Definition Interface ────────────────────────────────────
 
@@ -7,7 +9,7 @@ export interface BlockMeta {
   label: string;
   description: string;
   category: "structure" | "content" | "media" | "interaction";
-  icon: string;
+  icon: LucideIcon;
 }
 
 export interface BlockDefinition extends BlockMeta {
@@ -101,7 +103,7 @@ export const blockRegistry: Record<string, BlockDefinition> = {
     label: "Hero",
     description: "Seção principal com headline, subtítulo e botão CTA",
     category: "structure",
-    icon: "layout",
+    icon: LayoutTemplate,
     defaults: heroDefaults,
   },
   text: {
@@ -109,7 +111,7 @@ export const blockRegistry: Record<string, BlockDefinition> = {
     label: "Texto",
     description: "Bloco de texto com título e parágrafo",
     category: "content",
-    icon: "type",
+    icon: Type,
     defaults: textDefaults,
   },
   image: {
@@ -117,7 +119,7 @@ export const blockRegistry: Record<string, BlockDefinition> = {
     label: "Imagem",
     description: "Imagem com legenda e texto alternativo",
     category: "media",
-    icon: "image",
+    icon: Image,
     defaults: imageDefaults,
   },
   "feature-grid": {
@@ -125,7 +127,7 @@ export const blockRegistry: Record<string, BlockDefinition> = {
     label: "Feature Grid",
     description: "Grade de features ou benefícios em 3 colunas",
     category: "content",
-    icon: "grid",
+    icon: Grid3X3,
     defaults: featureGridDefaults,
   },
   cta: {
@@ -133,7 +135,7 @@ export const blockRegistry: Record<string, BlockDefinition> = {
     label: "CTA",
     description: "Seção de chamada para ação com fundo colorido",
     category: "content",
-    icon: "megaphone",
+    icon: Megaphone,
     defaults: ctaDefaults,
   },
   contact: {
@@ -141,7 +143,7 @@ export const blockRegistry: Record<string, BlockDefinition> = {
     label: "Contato",
     description: "Informações de contato (email, telefone, endereço)",
     category: "interaction",
-    icon: "mail",
+    icon: Mail,
     defaults: contactDefaults,
   },
   faq: {
@@ -149,7 +151,7 @@ export const blockRegistry: Record<string, BlockDefinition> = {
     label: "FAQ",
     description: "Perguntas e respostas em formato accordion",
     category: "content",
-    icon: "help-circle",
+    icon: HelpCircle,
     defaults: faqDefaults,
   },
   testimonials: {
@@ -157,7 +159,7 @@ export const blockRegistry: Record<string, BlockDefinition> = {
     label: "Depoimentos",
     description: "Grade de depoimentos de clientes",
     category: "content",
-    icon: "quote",
+    icon: Quote,
     defaults: testimonialsDefaults,
   },
 };
