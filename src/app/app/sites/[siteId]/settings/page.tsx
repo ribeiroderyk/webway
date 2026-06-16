@@ -201,43 +201,72 @@ function GeneralForm({ site, saving, onSave }: { site: SiteData; saving: boolean
   const [description, setDescription] = useState(site.description ?? "");
   const [language, setLanguage] = useState(site.language);
 
+  const isPublished = site.status === "PUBLISHED";
+
   return (
-    <FormCard title="Informações gerais">
-      <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-        <FormRow label="Nome do site">
-          <input type="text" value={name} onChange={(e) => setName(e.target.value)} style={inputStyle} />
-        </FormRow>
-        <FormRow label="Slug (URL)">
-          <input
-            type="text"
-            defaultValue={site.slug}
-            disabled
-            style={{ ...inputStyle, backgroundColor: "#f8fafc", color: "#94a3b8", cursor: "not-allowed" }}
-          />
-          <p style={{ fontSize: "0.75rem", color: "#94a3b8", marginTop: "4px" }}>O slug não pode ser alterado após a criação.</p>
-        </FormRow>
-        <FormRow label="Descrição">
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={3}
-            placeholder="Descrição breve do site para SEO…"
-            style={{ ...inputStyle, resize: "vertical", lineHeight: 1.5 }}
-          />
-        </FormRow>
-        <FormRow label="Idioma principal">
-          <select value={language} onChange={(e) => setLanguage(e.target.value)} style={inputStyle}>
-            <option value="pt-BR">Português (Brasil)</option>
-            <option value="en-US">English (US)</option>
-            <option value="es-ES">Español</option>
-            <option value="fr-FR">Français</option>
-          </select>
-        </FormRow>
-        <div style={{ display: "flex", justifyContent: "flex-end" }}>
-          <SaveBtn saving={saving} onClick={() => onSave({ name, description: description || null, language })} />
+    <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+      {/* Status card */}
+      <div style={{
+        backgroundColor: isPublished ? "#f0fdf4" : "#fef9ec",
+        border: `1px solid ${isPublished ? "#bbf7d0" : "#fde68a"}`,
+        borderRadius: "16px",
+        padding: "16px 20px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+      }}>
+        <div>
+          <p style={{ fontWeight: 600, color: isPublished ? "#166534" : "#92400e", fontSize: "0.9375rem" }}>
+            {isPublished ? "Site publicado" : "Site como rascunho"}
+          </p>
+          <p style={{ fontSize: "0.8125rem", color: isPublished ? "#16a34a" : "#b45309", marginTop: "2px" }}>
+            {isPublished ? "Visível ao público." : "Não visível ao público."}
+          </p>
         </div>
+        <SaveBtn
+          saving={saving}
+          onClick={() => onSave({ status: isPublished ? "DRAFT" : "PUBLISHED" })}
+          label={isPublished ? "Despublicar" : "Publicar"}
+        />
       </div>
-    </FormCard>
+
+      <FormCard title="Informações gerais">
+        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          <FormRow label="Nome do site">
+            <input type="text" value={name} onChange={(e) => setName(e.target.value)} style={inputStyle} />
+          </FormRow>
+          <FormRow label="Slug (URL)">
+            <input
+              type="text"
+              defaultValue={site.slug}
+              disabled
+              style={{ ...inputStyle, backgroundColor: "#f8fafc", color: "#94a3b8", cursor: "not-allowed" }}
+            />
+            <p style={{ fontSize: "0.75rem", color: "#94a3b8", marginTop: "4px" }}>O slug não pode ser alterado após a criação.</p>
+          </FormRow>
+          <FormRow label="Descrição">
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={3}
+              placeholder="Descrição breve do site para SEO…"
+              style={{ ...inputStyle, resize: "vertical", lineHeight: 1.5 }}
+            />
+          </FormRow>
+          <FormRow label="Idioma principal">
+            <select value={language} onChange={(e) => setLanguage(e.target.value)} style={inputStyle}>
+              <option value="pt-BR">Português (Brasil)</option>
+              <option value="en-US">English (US)</option>
+              <option value="es-ES">Español</option>
+              <option value="fr-FR">Français</option>
+            </select>
+          </FormRow>
+          <div style={{ display: "flex", justifyContent: "flex-end" }}>
+            <SaveBtn saving={saving} onClick={() => onSave({ name, description: description || null, language })} />
+          </div>
+        </div>
+      </FormCard>
+    </div>
   );
 }
 

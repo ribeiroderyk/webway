@@ -122,22 +122,32 @@ function PublicBlock({ block }: { block: Block }) {
       );
 
     case "feature-grid": {
-      const features = (props.features as Array<{ title: string; description: string }>) ?? [];
+      const features = (props.features as Array<{ title: string; description: string; icon?: string }>) ?? [];
+      const iconEmoji: Record<string, string> = {
+        star: "⭐", zap: "⚡", shield: "🛡️", check: "✅", heart: "❤️",
+        clock: "⏰", globe: "🌐", lock: "🔒", chart: "📊", rocket: "🚀",
+        smile: "😊", target: "🎯", tool: "🔧", users: "👥", mail: "📧",
+      };
       return (
         <section style={{ padding: "64px 24px", maxWidth: "1200px", margin: "0 auto" }}>
           <h2 style={{ fontSize: "1.875rem", fontWeight: 700, textAlign: "center", marginBottom: "16px" }}>
             {props.title as string}
           </h2>
           {!!props.description && (
-            <p style={{ textAlign: "center", color: "#475569", marginBottom: "48px" }}>
+            <p style={{ textAlign: "center", color: "#475569", marginBottom: "48px", fontSize: "1.125rem" }}>
               {props.description as string}
             </p>
           )}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "32px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "24px" }}>
             {features.map((f, i) => (
-              <div key={i} style={{ padding: "24px", border: "1px solid #e2e8f0", borderRadius: "12px" }}>
-                <h3 style={{ fontWeight: 600, marginBottom: "8px" }}>{f.title}</h3>
-                <p style={{ color: "#475569", fontSize: "0.9375rem" }}>{f.description}</p>
+              <div key={i} style={{ padding: "28px 24px", border: "1px solid #e2e8f0", borderRadius: "16px", backgroundColor: "white" }}>
+                {f.icon && (
+                  <div style={{ fontSize: "1.75rem", marginBottom: "12px" }}>
+                    {iconEmoji[f.icon] ?? "✨"}
+                  </div>
+                )}
+                <h3 style={{ fontWeight: 600, marginBottom: "8px", fontSize: "1.0625rem" }}>{f.title}</h3>
+                <p style={{ color: "#475569", fontSize: "0.9375rem", lineHeight: 1.6 }}>{f.description}</p>
               </div>
             ))}
           </div>
