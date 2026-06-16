@@ -1,9 +1,9 @@
-// Changed: replaced placeholder BlockRenderer with shared component
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { buildPageMeta, buildWebPageSchema, buildFaqSchema } from "@/lib/seo";
 import { BlockRenderer } from "@/components/public/BlockRenderer";
 import { SiteLayout } from "@/components/public/SiteLayout";
+import { findRedirect } from "@/server/services/redirectService";
 import type { Metadata } from "next";
 import type { Block } from "@/types";
 
@@ -53,7 +53,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function SitePage({ params }: Props) {
   const { siteSlug, pageSlug } = await params;
   const page = await getPage(siteSlug, pageSlug);
-  if (!page) notFound();
+
+  if (!page) {
+    const site = await prisma.site.findFirst({ where: { slug: siteSlug, status: "PUBLISHED" }, select: { id: true } });
+    if (site) {
+      const r = await findRedirect(site.id, `/${pageSlug}`);
+      if (r) redirect(r.toPath.startsWith("http") ? r.toPath : `/s/${siteSlug}${r.toPath}`);
+    }
+    notFound();
+  }
 
   const blocks = (Array.isArray(page.blocks) ? page.blocks : []) as unknown as Block[];
   const webPageSchema = buildWebPageSchema(page, page.site);

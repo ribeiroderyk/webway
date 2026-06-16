@@ -2,8 +2,8 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import {
   Globe, PenSquare, Image, Search,
-  Zap, Shield, Server, ArrowRight,
-  Check, Twitter, Github, Code2,
+  Zap, Shield, ArrowRight,
+  Check, Github,
 } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -27,6 +27,7 @@ export default function LandingPage() {
       <FeaturesSection />
       <TechnicalSeoSection />
       <ComparisonSection />
+      <PricingSection />
       <CtaSection />
       <Footer />
     </div>
@@ -321,6 +322,139 @@ function CellIcon({ val, highlight }: { val: boolean; highlight?: boolean }) {
   return val
     ? <Check size={18} color={highlight ? "#6366f1" : "#22c55e"} style={{ margin: "0 auto" }} />
     : <span style={{ color: "#cbd5e1", fontSize: "1.25rem" }}>—</span>;
+}
+
+function PricingSection() {
+  const plans = [
+    {
+      name: "Gratuito",
+      price: "R$ 0",
+      period: "para sempre",
+      description: "Para quem está começando.",
+      highlight: false,
+      features: [
+        "1 site",
+        "5 páginas por site",
+        "10 posts por site",
+        "500 MB de armazenamento",
+        "Subdomínio webway.host",
+        "Auditoria SEO básica",
+      ],
+      cta: "Começar grátis",
+      href: "/signup",
+    },
+    {
+      name: "Pro",
+      price: "R$ 49",
+      period: "por mês",
+      description: "Para freelancers e agências.",
+      highlight: true,
+      features: [
+        "Sites ilimitados",
+        "Páginas ilimitadas",
+        "Posts ilimitados",
+        "10 GB de armazenamento",
+        "Domínio customizado",
+        "Auditoria SEO completa",
+        "Redirects 301/302",
+        "Suporte prioritário",
+      ],
+      cta: "Assinar Pro",
+      href: "/signup",
+    },
+    {
+      name: "Business",
+      price: "R$ 149",
+      period: "por mês",
+      description: "Para times e empresas.",
+      highlight: false,
+      features: [
+        "Tudo do Pro",
+        "Múltiplos usuários",
+        "White-label",
+        "50 GB de armazenamento",
+        "API de integração",
+        "SLA 99.9%",
+        "Onboarding dedicado",
+      ],
+      cta: "Falar com vendas",
+      href: "/signup",
+    },
+  ];
+
+  return (
+    <section id="pricing" style={{ padding: "96px 24px", backgroundColor: "#f8fafc" }}>
+      <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
+        <SectionHeader
+          label="Preços"
+          title="Simples e transparente"
+          desc="Sem taxas escondidas. Cancele quando quiser. Comece grátis."
+        />
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "24px", marginTop: "56px" }}>
+          {plans.map((plan) => (
+            <div
+              key={plan.name}
+              style={{
+                backgroundColor: plan.highlight ? "#6366f1" : "white",
+                border: plan.highlight ? "none" : "1px solid #e2e8f0",
+                borderRadius: "20px",
+                padding: "32px",
+                display: "flex",
+                flexDirection: "column",
+                position: "relative",
+                boxShadow: plan.highlight ? "0 20px 60px rgba(99,102,241,0.3)" : "none",
+              }}
+            >
+              {plan.highlight && (
+                <span style={{
+                  position: "absolute", top: "-12px", left: "50%", transform: "translateX(-50%)",
+                  backgroundColor: "#f59e0b", color: "white", padding: "4px 16px",
+                  borderRadius: "9999px", fontSize: "0.75rem", fontWeight: 700,
+                }}>
+                  MAIS POPULAR
+                </span>
+              )}
+              <p style={{ fontSize: "0.9375rem", fontWeight: 600, color: plan.highlight ? "rgba(255,255,255,0.8)" : "#64748b", marginBottom: "8px" }}>
+                {plan.name}
+              </p>
+              <div style={{ display: "flex", alignItems: "baseline", gap: "4px", marginBottom: "4px" }}>
+                <span style={{ fontSize: "2.5rem", fontWeight: 800, color: plan.highlight ? "white" : "#0f172a" }}>
+                  {plan.price}
+                </span>
+                <span style={{ fontSize: "0.875rem", color: plan.highlight ? "rgba(255,255,255,0.6)" : "#94a3b8" }}>
+                  /{plan.period}
+                </span>
+              </div>
+              <p style={{ fontSize: "0.875rem", color: plan.highlight ? "rgba(255,255,255,0.7)" : "#64748b", marginBottom: "28px" }}>
+                {plan.description}
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px", flex: 1, marginBottom: "28px" }}>
+                {plan.features.map((f) => (
+                  <div key={f} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <Check size={15} color={plan.highlight ? "rgba(255,255,255,0.9)" : "#22c55e"} style={{ flexShrink: 0 }} />
+                    <span style={{ fontSize: "0.9375rem", color: plan.highlight ? "rgba(255,255,255,0.9)" : "#334155" }}>{f}</span>
+                  </div>
+                ))}
+              </div>
+              <a
+                href={plan.href}
+                style={{
+                  display: "block", textAlign: "center",
+                  padding: "12px 24px",
+                  backgroundColor: plan.highlight ? "white" : "#6366f1",
+                  color: plan.highlight ? "#6366f1" : "white",
+                  borderRadius: "10px", fontWeight: 700, textDecoration: "none",
+                  fontSize: "0.9375rem",
+                }}
+              >
+                {plan.cta}
+              </a>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
 }
 
 function CtaSection() {
