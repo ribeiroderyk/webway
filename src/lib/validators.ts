@@ -64,6 +64,7 @@ export const createPageSchema = z.object({
       /^[a-z0-9-/]+$/,
       "Slug inválido"
     ),
+  template: z.string().optional(),
   templateId: z.string().cuid().optional(),
 });
 

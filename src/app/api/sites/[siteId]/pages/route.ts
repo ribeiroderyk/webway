@@ -3,6 +3,7 @@ import { requireAuth } from "@/lib/auth";
 import { createPage, listPages } from "@/server/services/pageService";
 import { createPageSchema } from "@/lib/validators";
 import { handleApiError, requireSiteAccess } from "@/lib/permissions";
+import { getTemplate } from "@/lib/templates";
 
 export async function GET(
   request: NextRequest,
@@ -35,7 +36,8 @@ export async function POST(
 
     const body = await request.json();
     const input = createPageSchema.parse(body);
-    const newPage = await createPage(siteId, input);
+    const templateBlocks = input.template ? (getTemplate(input.template)?.blocks ?? []) : [];
+    const newPage = await createPage(siteId, { ...input, templateBlocks });
     return Response.json({ data: newPage, message: "Página criada." }, { status: 201 });
   } catch (err) {
     return handleApiError(err);
