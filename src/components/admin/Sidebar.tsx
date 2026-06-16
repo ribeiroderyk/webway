@@ -14,6 +14,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ArrowLeftRight,
+  Menu,
 } from "lucide-react";
 
 interface SiteNavItem {
@@ -37,6 +38,7 @@ function getSiteNav(siteId: string): SiteNavItem[] {
     { href: `/app/sites/${siteId}/pages`, label: "Páginas", icon: FileText },
     { href: `/app/sites/${siteId}/posts`, label: "Blog", icon: PenSquare },
     { href: `/app/sites/${siteId}/media`, label: "Mídia", icon: Image },
+    { href: `/app/sites/${siteId}/navigation`, label: "Navegação", icon: Menu },
     { href: `/app/sites/${siteId}/seo`, label: "SEO", icon: Search },
     { href: `/app/sites/${siteId}/redirects`, label: "Redirects", icon: ArrowLeftRight },
     { href: `/app/sites/${siteId}/settings`, label: "Configurações", icon: Settings },
