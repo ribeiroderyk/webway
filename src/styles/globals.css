@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-app: theme(colors.neutral.50);
+    --bg-surface: theme(colors.white);
+    --bg-sunken: theme(colors.neutral.100);
+    --border-default: theme(colors.neutral.200);
+    --border-strong: theme(colors.neutral.300);
+    --text-primary: theme(colors.neutral.900);
+    --text-secondary: theme(colors.neutral.600);
+    --text-tertiary: theme(colors.neutral.400);
+    --shadow-focus: 0 0 0 3px rgb(99 102 241 / 0.2);
+  }
+
+  .dark {
+    --bg-app: theme(colors.neutral.950);
+    --bg-surface: theme(colors.neutral.900);
+    --bg-sunken: theme(colors.neutral.800);
+    --border-default: theme(colors.neutral.700);
+    --border-strong: theme(colors.neutral.600);
+    --text-primary: theme(colors.neutral.50);
+    --text-secondary: theme(colors.neutral.400);
+    --text-tertiary: theme(colors.neutral.600);
+  }
+
+  * {
+    @apply border-neutral-200;
+  }
+
+  body {
+    @apply bg-neutral-50 text-neutral-900 antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+  }
+}
+
+@layer utilities {
+  .sidebar-width { width: 260px; }
+  .sidebar-compact-width { width: 72px; }
+  .topbar-height { height: 64px; }
+
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2;
+  }
+
+  .text-balance { text-wrap: balance; }
+
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: theme(colors.neutral.300) transparent;
+  }
+}
