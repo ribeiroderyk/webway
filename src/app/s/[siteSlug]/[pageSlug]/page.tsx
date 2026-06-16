@@ -55,7 +55,7 @@ export default async function SitePage({ params }: Props) {
   const page = await getPage(siteSlug, pageSlug);
   if (!page) notFound();
 
-  const blocks = (Array.isArray(page.blocks) ? page.blocks : []) as Block[];
+  const blocks = (Array.isArray(page.blocks) ? page.blocks : []) as unknown as Block[];
   const webPageSchema = buildWebPageSchema(page, page.site);
 
   const faqBlock = blocks.find((b) => b.type === "faq");

@@ -31,7 +31,7 @@ export default async function EditorPage({ params }: Props) {
         title: page.title,
         slug: page.slug,
         status: page.status,
-        blocks: Array.isArray(page.blocks) ? (page.blocks as import("@/types").Block[]) : [],
+        blocks: Array.isArray(page.blocks) ? (page.blocks as unknown as import("@/types").Block[]) : [],
       }}
     />
   );

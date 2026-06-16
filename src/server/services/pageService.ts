@@ -147,7 +147,7 @@ async function updateSeoAudit(
     blocks: unknown;
   }
 ) {
-  const blocks = (Array.isArray(page.blocks) ? page.blocks : []) as Block[];
+  const blocks = (Array.isArray(page.blocks) ? page.blocks : []) as unknown as Block[];
   const { score } = auditPageSeo(
     {
       title: page.title,
