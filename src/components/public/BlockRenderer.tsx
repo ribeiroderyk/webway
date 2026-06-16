@@ -32,7 +32,7 @@ function PublicBlock({ block }: { block: Block }) {
             margin: "0 auto",
           }}
         >
-          {props.eyebrow && (
+          {!!props.eyebrow && (
             <p style={{ color: "#6366f1", fontWeight: 600, fontSize: "14px", marginBottom: "16px" }}>
               {props.eyebrow as string}
             </p>
@@ -40,12 +40,12 @@ function PublicBlock({ block }: { block: Block }) {
           <h1 style={{ fontSize: "clamp(2rem, 5vw, 3rem)", fontWeight: 700, marginBottom: "24px" }}>
             {props.headline as string}
           </h1>
-          {props.subheadline && (
+          {!!props.subheadline && (
             <p style={{ fontSize: "1.25rem", color: "#475569", marginBottom: "32px", maxWidth: "640px", margin: "0 auto 32px" }}>
               {props.subheadline as string}
             </p>
           )}
-          {props.buttonText && (
+          {!!props.buttonText && (
             <a
               href={props.buttonUrl as string}
               style={{
@@ -79,7 +79,7 @@ function PublicBlock({ block }: { block: Block }) {
     case "image":
       return (
         <section style={{ padding: "32px 24px", maxWidth: "1200px", margin: "0 auto" }}>
-          {props.imageUrl && (
+          {!!props.imageUrl && (
             <img
               src={props.imageUrl as string}
               alt={(props.altText as string) || ""}
@@ -87,7 +87,7 @@ function PublicBlock({ block }: { block: Block }) {
               style={{ width: "100%", borderRadius: "12px" }}
             />
           )}
-          {props.caption && (
+          {!!props.caption && (
             <p style={{ textAlign: "center", color: "#64748b", fontSize: "0.875rem", marginTop: "8px" }}>
               {props.caption as string}
             </p>
@@ -102,7 +102,7 @@ function PublicBlock({ block }: { block: Block }) {
           <h2 style={{ fontSize: "1.875rem", fontWeight: 700, textAlign: "center", marginBottom: "16px" }}>
             {props.title as string}
           </h2>
-          {props.description && (
+          {!!props.description && (
             <p style={{ textAlign: "center", color: "#475569", marginBottom: "48px" }}>
               {props.description as string}
             </p>
@@ -135,7 +135,7 @@ function PublicBlock({ block }: { block: Block }) {
           <p style={{ fontSize: "1.125rem", marginBottom: "32px", opacity: 0.9 }}>
             {props.description as string}
           </p>
-          {props.buttonText && (
+          {!!props.buttonText && (
             <a
               href={props.buttonUrl as string}
               style={{
@@ -160,16 +160,16 @@ function PublicBlock({ block }: { block: Block }) {
           <h2 style={{ fontSize: "1.875rem", fontWeight: 700, marginBottom: "16px" }}>
             {props.title as string}
           </h2>
-          {props.description && (
+          {!!props.description && (
             <p style={{ color: "#475569", marginBottom: "32px" }}>{props.description as string}</p>
           )}
-          {props.email && (
+          {!!props.email && (
             <p style={{ marginBottom: "8px" }}>
               <a href={`mailto:${props.email}`} style={{ color: "#6366f1" }}>{props.email as string}</a>
             </p>
           )}
-          {props.phone && <p style={{ marginBottom: "8px" }}>{props.phone as string}</p>}
-          {props.address && <p>{props.address as string}</p>}
+          {!!props.phone && <p style={{ marginBottom: "8px" }}>{props.phone as string}</p>}
+          {!!props.address && <p>{props.address as string}</p>}
         </section>
       );
 

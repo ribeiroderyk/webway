@@ -8,16 +8,16 @@ export function BlockPreview({ block }: { block: Block }) {
     case "hero":
       return (
         <div style={{ padding: "48px 32px", backgroundColor: (props.bgColor as string) || "#f8fafc", textAlign: (props.alignment as string) === "center" ? "center" : "left" }}>
-          {props.eyebrow && (
+          {!!props.eyebrow && (
             <p style={{ color: "#6366f1", fontWeight: 600, fontSize: "0.875rem", marginBottom: "8px" }}>{props.eyebrow as string}</p>
           )}
           <h1 style={{ fontSize: "2rem", fontWeight: 700, color: "#0f172a", marginBottom: "12px" }}>
             {(props.headline as string) || "Título principal"}
           </h1>
-          {props.subheadline && (
+          {!!props.subheadline && (
             <p style={{ fontSize: "1.125rem", color: "#475569", marginBottom: "20px" }}>{props.subheadline as string}</p>
           )}
-          {props.buttonText && (
+          {!!props.buttonText && (
             <span style={{ display: "inline-block", padding: "10px 20px", backgroundColor: "#6366f1", color: "white", borderRadius: "8px", fontWeight: 500, fontSize: "0.9375rem" }}>
               {props.buttonText as string}
             </span>
@@ -68,7 +68,7 @@ export function BlockPreview({ block }: { block: Block }) {
         <div style={{ padding: "40px 32px", backgroundColor: (props.bgColor as string) || "#6366f1", textAlign: "center" }}>
           <h2 style={{ fontSize: "1.5rem", fontWeight: 700, color: "white", marginBottom: "8px" }}>{(props.title as string) || "Call to Action"}</h2>
           <p style={{ color: "rgba(255,255,255,0.85)", marginBottom: "20px" }}>{props.description as string}</p>
-          {props.buttonText && (
+          {!!props.buttonText && (
             <span style={{ display: "inline-block", padding: "10px 20px", backgroundColor: "white", color: (props.bgColor as string) || "#6366f1", borderRadius: "8px", fontWeight: 600 }}>
               {props.buttonText as string}
             </span>
@@ -80,8 +80,8 @@ export function BlockPreview({ block }: { block: Block }) {
       return (
         <div style={{ padding: "40px 32px" }}>
           <h2 style={{ fontSize: "1.5rem", fontWeight: 700, color: "#0f172a", marginBottom: "8px" }}>{(props.title as string) || "Contato"}</h2>
-          {props.email && <p style={{ color: "#475569", fontSize: "0.9375rem" }}>✉ {props.email as string}</p>}
-          {props.phone && <p style={{ color: "#475569", fontSize: "0.9375rem" }}>{props.phone as string}</p>}
+          {!!props.email && <p style={{ color: "#475569", fontSize: "0.9375rem" }}>✉ {props.email as string}</p>}
+          {!!props.phone && <p style={{ color: "#475569", fontSize: "0.9375rem" }}>{props.phone as string}</p>}
         </div>
       );
 
