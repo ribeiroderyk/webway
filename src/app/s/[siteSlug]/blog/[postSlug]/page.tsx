@@ -7,6 +7,7 @@ import {
   buildSiteUrl,
 } from "@/lib/seo";
 import type { Metadata } from "next";
+import type { JSX } from "react";
 
 interface Props {
   params: Promise<{ siteSlug: string; postSlug: string }>;
