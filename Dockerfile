@@ -27,6 +27,9 @@ ENV NODE_ENV=$NODE_ENV
 ENV STORAGE_PROVIDER=$STORAGE_PROVIDER
 ENV NEXT_PUBLIC_UPLOADS_URL=$NEXT_PUBLIC_UPLOADS_URL
 
+# Garante que public/ existe (Next.js não cria se não houver assets)
+RUN mkdir -p /app/public
+
 # Gera o Prisma client
 RUN npx prisma generate
 
