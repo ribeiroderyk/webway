@@ -1,13 +1,18 @@
 "use client";
 
+import { useState } from "react";
+import { Image as ImageIcon } from "lucide-react";
 import type { Block } from "@/types";
+import { MediaPickerModal } from "./MediaPickerModal";
 
 interface PropertiesPanelProps {
   block: Block | null;
+  siteId: string;
   onChange: (props: Record<string, unknown>) => void;
 }
 
-export function PropertiesPanel({ block, onChange }: PropertiesPanelProps) {
+export function PropertiesPanel({ block, siteId, onChange }: PropertiesPanelProps) {
+  const [pickerTarget, setPickerTarget] = useState<null | { key: string; nested?: { arrayKey: string; index: number; field: string } }>(null);
   if (!block) {
     return (
       <div
@@ -96,6 +101,13 @@ export function PropertiesPanel({ block, onChange }: PropertiesPanelProps) {
           <Field label="Cor de fundo">
             <Input value={(props.bgColor as string) ?? "#f8fafc"} onChange={(v) => update("bgColor", v)} placeholder="#f8fafc" />
           </Field>
+          <Field label="Imagem (opcional)">
+            <ImageInput
+              value={(props.imageUrl as string) ?? ""}
+              onChange={(v) => update("imageUrl", v)}
+              onPickFromLibrary={() => setPickerTarget({ key: "imageUrl" })}
+            />
+          </Field>
         </Fields>
       )}
 
@@ -113,7 +125,11 @@ export function PropertiesPanel({ block, onChange }: PropertiesPanelProps) {
       {block.type === "image" && (
         <Fields>
           <Field label="URL da imagem">
-            <Input value={(props.imageUrl as string) ?? ""} onChange={(v) => update("imageUrl", v)} placeholder="https://…" />
+            <ImageInput
+              value={(props.imageUrl as string) ?? ""}
+              onChange={(v) => update("imageUrl", v)}
+              onPickFromLibrary={() => setPickerTarget({ key: "imageUrl" })}
+            />
           </Field>
           <Field label="Texto alternativo">
             <Input value={(props.altText as string) ?? ""} onChange={(v) => update("altText", v)} placeholder="Descrição da imagem" />
@@ -251,7 +267,7 @@ export function PropertiesPanel({ block, onChange }: PropertiesPanelProps) {
             <Input value={(props.title as string) ?? ""} onChange={(v) => update("title", v)} placeholder="Depoimentos" />
           </Field>
           <Field label="Depoimentos">
-            {((props.testimonials as Array<{ name: string; role: string; content: string }>) ?? []).map((t, i) => (
+            {((props.testimonials as Array<{ name: string; role: string; content: string; avatarUrl?: string }>) ?? []).map((t, i) => (
               <div key={i} style={{ border: "1px solid #e2e8f0", borderRadius: "8px", padding: "10px", marginBottom: "8px" }}>
                 <Input value={t.name} onChange={(v) => updateNestedArray("testimonials", i, "name", v)} placeholder="Nome" />
                 <div style={{ marginTop: "6px" }}>
@@ -259,6 +275,14 @@ export function PropertiesPanel({ block, onChange }: PropertiesPanelProps) {
                 </div>
                 <div style={{ marginTop: "6px" }}>
                   <Textarea value={t.content} onChange={(v) => updateNestedArray("testimonials", i, "content", v)} placeholder="Depoimento…" rows={3} />
+                </div>
+                <div style={{ marginTop: "6px" }}>
+                  <ImageInput
+                    value={t.avatarUrl ?? ""}
+                    onChange={(v) => updateNestedArray("testimonials", i, "avatarUrl", v)}
+                    onPickFromLibrary={() => setPickerTarget({ key: "testimonials", nested: { arrayKey: "testimonials", index: i, field: "avatarUrl" } })}
+                    placeholder="URL do avatar (opcional)"
+                  />
                 </div>
                 <button
                   onClick={() => removeArrayItem("testimonials", i)}
@@ -269,13 +293,30 @@ export function PropertiesPanel({ block, onChange }: PropertiesPanelProps) {
               </div>
             ))}
             <button
-              onClick={() => addArrayItem("testimonials", { name: "", role: "", content: "" })}
+              onClick={() => addArrayItem("testimonials", { name: "", role: "", content: "", avatarUrl: "" })}
               style={{ fontSize: "0.8125rem", color: "#6366f1", background: "none", border: "none", cursor: "pointer" }}
             >
               + Adicionar depoimento
             </button>
           </Field>
         </Fields>
+      )}
+
+      {/* Media picker modal */}
+      {pickerTarget && (
+        <MediaPickerModal
+          siteId={siteId}
+          onClose={() => setPickerTarget(null)}
+          onSelect={(url) => {
+            if (pickerTarget.nested) {
+              const { arrayKey, index, field } = pickerTarget.nested;
+              updateNestedArray(arrayKey, index, field, url);
+            } else {
+              update(pickerTarget.key, url);
+            }
+            setPickerTarget(null);
+          }}
+        />
       )}
     </div>
   );
@@ -385,5 +426,44 @@ function Select({
         <option key={opt.value} value={opt.value}>{opt.label}</option>
       ))}
     </select>
+  );
+}
+
+function ImageInput({
+  value,
+  onChange,
+  onPickFromLibrary,
+  placeholder = "https://…",
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  onPickFromLibrary: () => void;
+  placeholder?: string;
+}) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        style={{ width: "100%", padding: "7px 10px", border: "1px solid #d1d5db", borderRadius: "7px", fontSize: "0.875rem", color: "#0f172a", outline: "none", boxSizing: "border-box" }}
+      />
+      <button
+        type="button"
+        onClick={onPickFromLibrary}
+        style={{
+          display: "inline-flex", alignItems: "center", gap: "5px",
+          padding: "5px 10px", border: "1px solid #e2e8f0", borderRadius: "6px",
+          backgroundColor: "#f8fafc", color: "#475569", fontSize: "0.75rem",
+          fontWeight: 500, cursor: "pointer", alignSelf: "flex-start",
+        }}
+      >
+        <ImageIcon size={13} /> Escolher da biblioteca
+      </button>
+      {value && (
+        <img src={value} alt="" style={{ width: "100%", maxHeight: "80px", objectFit: "cover", borderRadius: "6px", border: "1px solid #e2e8f0" }} />
+      )}
+    </div>
   );
 }

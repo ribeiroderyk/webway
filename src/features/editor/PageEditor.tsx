@@ -240,6 +240,7 @@ export function PageEditor({ site, page }: PageEditorProps) {
         {/* Properties panel */}
         <PropertiesPanel
           block={selectedBlock}
+          siteId={site.id}
           onChange={(props) => selectedBlock && updateBlock(selectedBlock.id, props)}
         />
       </div>

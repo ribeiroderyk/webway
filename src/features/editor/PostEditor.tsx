@@ -7,8 +7,9 @@ import {
   ArrowLeft, Save, Globe, Eye, EyeOff,
   Bold, Italic, Underline, Strikethrough,
   List, ListOrdered, Quote, Code, Link as LinkIcon,
-  Heading1, Heading2, Heading3,
+  Heading1, Heading2, Heading3, Image as ImageIcon,
 } from "lucide-react";
+import { MediaPickerModal } from "./MediaPickerModal";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import TiptapLink from "@tiptap/extension-link";
@@ -43,6 +44,7 @@ export function PostEditor({ site, post }: PostEditorProps) {
   const [isDirty, setIsDirty] = useState(false);
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
+  const [coverPickerOpen, setCoverPickerOpen] = useState(false);
 
   const editor = useEditor({
     extensions: [
@@ -222,7 +224,21 @@ export function PostEditor({ site, post }: PostEditorProps) {
               placeholder="https://…"
               style={sidebarInputStyle}
             />
-            <p style={{ fontSize: "0.75rem", color: "#94a3b8", marginTop: "4px" }}>URL da imagem de capa</p>
+            <button
+              type="button"
+              onClick={() => setCoverPickerOpen(true)}
+              style={{
+                display: "inline-flex", alignItems: "center", gap: "5px",
+                marginTop: "6px", padding: "5px 10px", border: "1px solid #e2e8f0",
+                borderRadius: "6px", backgroundColor: "#f8fafc", color: "#475569",
+                fontSize: "0.75rem", fontWeight: 500, cursor: "pointer",
+              }}
+            >
+              <ImageIcon size={13} /> Escolher da biblioteca
+            </button>
+            {coverImageUrl && (
+              <img src={coverImageUrl} alt="" style={{ width: "100%", marginTop: "8px", borderRadius: "6px", maxHeight: "80px", objectFit: "cover", border: "1px solid #e2e8f0" }} />
+            )}
           </SidebarCard>
 
           {/* Excerpt card */}
@@ -301,6 +317,15 @@ export function PostEditor({ site, post }: PostEditorProps) {
           )}
         </div>
       </div>
+
+      {/* Cover image picker */}
+      {coverPickerOpen && (
+        <MediaPickerModal
+          siteId={site.id}
+          onClose={() => setCoverPickerOpen(false)}
+          onSelect={(url) => { setCoverImageUrl(url); setIsDirty(true); setCoverPickerOpen(false); }}
+        />
+      )}
     </div>
   );
 }
