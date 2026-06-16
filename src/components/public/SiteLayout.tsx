@@ -1,5 +1,8 @@
+import { prisma } from "@/lib/prisma";
+
 interface SiteLayoutProps {
   site: {
+    id: string;
     name: string;
     logoUrl: string | null;
     primaryColor: string;
@@ -8,7 +11,28 @@ interface SiteLayoutProps {
   children: React.ReactNode;
 }
 
-export function SiteLayout({ site, children }: SiteLayoutProps) {
+async function getNavPages(siteId: string) {
+  return prisma.page.findMany({
+    where: { siteId, status: "PUBLISHED", showInNav: true, slug: { not: "/" } },
+    orderBy: { navOrder: "asc" },
+    select: { title: true, slug: true },
+    take: 8,
+  });
+}
+
+async function hasBlogPosts(siteId: string) {
+  const count = await prisma.post.count({
+    where: { siteId, status: "PUBLISHED" },
+  });
+  return count > 0;
+}
+
+export async function SiteLayout({ site, children }: SiteLayoutProps) {
+  const [navPages, showBlog] = await Promise.all([
+    getNavPages(site.id),
+    hasBlogPosts(site.id),
+  ]);
+
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       <header
@@ -29,11 +53,24 @@ export function SiteLayout({ site, children }: SiteLayoutProps) {
             </span>
           )}
         </a>
-        <nav style={{ display: "flex", gap: "24px" }}>
-          <a href={`/s/${site.slug}/blog`} style={{ color: "#334155", textDecoration: "none", fontSize: "0.9375rem" }}>
-            Blog
-          </a>
-        </nav>
+        {(navPages.length > 0 || showBlog) && (
+          <nav style={{ display: "flex", gap: "24px", flexWrap: "wrap" }}>
+            {navPages.map((page) => (
+              <a
+                key={page.slug}
+                href={`/s/${site.slug}/${page.slug}`}
+                style={{ color: "#334155", textDecoration: "none", fontSize: "0.9375rem" }}
+              >
+                {page.title}
+              </a>
+            ))}
+            {showBlog && (
+              <a href={`/s/${site.slug}/blog`} style={{ color: "#334155", textDecoration: "none", fontSize: "0.9375rem" }}>
+                Blog
+              </a>
+            )}
+          </nav>
+        )}
       </header>
       <main style={{ flex: 1 }}>{children}</main>
       <footer
