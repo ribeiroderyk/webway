@@ -1,36 +1,78 @@
-import { redirect, notFound } from "next/navigation";
-import Link from "next/link";
-import { getSession } from "@/lib/auth";
-import { getSiteById } from "@/server/services/siteService";
-import { listPosts } from "@/server/services/postService";
-import type { Metadata } from "next";
-import { Plus, PenSquare, Pencil, Eye } from "lucide-react";
+"use client";
 
-interface Props {
-  params: Promise<{ siteId: string }>;
-  searchParams: Promise<{ page?: string }>;
+import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
+import { useParams, useSearchParams, useRouter } from "next/navigation";
+import { Plus, PenSquare, Pencil, Eye, Globe, EyeOff, Trash2 } from "lucide-react";
+
+interface Post {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  status: string;
+  publishedAt: string | null;
+  author: { name: string };
 }
 
-export const metadata: Metadata = { title: "Blog" };
+interface SiteInfo {
+  name: string;
+  slug: string;
+}
 
 const STATUS_BADGE: Record<string, { label: string; color: string; bg: string }> = {
   PUBLISHED: { label: "Publicado", color: "#166534", bg: "#dcfce7" },
   DRAFT: { label: "Rascunho", color: "#92400e", bg: "#fef3c7" },
-  ARCHIVED: { label: "Arquivado", color: "#475569", bg: "#f1f5f9" },
 };
 
-export default async function PostsListPage({ params, searchParams }: Props) {
-  const { siteId } = await params;
-  const { page: pageParam } = await searchParams;
-  const session = await getSession();
-  if (!session) redirect("/login");
+export default function PostsListPage() {
+  const { siteId } = useParams<{ siteId: string }>();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const page = Number(searchParams.get("page") ?? 1);
 
-  const site = await getSiteById(siteId, session.user.workspaceId);
-  if (!site) notFound();
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [site, setSite] = useState<SiteInfo | null>(null);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [toggling, setToggling] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
 
-  const page = Number(pageParam ?? 1);
-  const { posts, total } = await listPosts(siteId, { page, perPage: 20 });
-  const totalPages = Math.ceil(total / 20);
+  const perPage = 20;
+  const totalPages = Math.ceil(total / perPage);
+
+  const load = useCallback(async () => {
+    const [postsRes, siteRes] = await Promise.all([
+      fetch(`/api/sites/${siteId}/posts?page=${page}&perPage=${perPage}`),
+      fetch(`/api/sites/${siteId}`),
+    ]);
+    const postsJson = await postsRes.json() as { data: { posts: Post[]; total: number } };
+    const siteJson = await siteRes.json() as { data: SiteInfo };
+    setPosts(postsJson.data.posts);
+    setTotal(postsJson.data.total);
+    setSite(siteJson.data);
+    setLoading(false);
+  }, [siteId, page]);
+
+  useEffect(() => { void load(); }, [load]);
+
+  async function togglePublish(post: Post) {
+    setToggling(post.id);
+    const method = post.status === "PUBLISHED" ? "DELETE" : "POST";
+    await fetch(`/api/sites/${siteId}/posts/${post.id}/publish`, { method });
+    await load();
+    setToggling(null);
+  }
+
+  async function handleDelete(post: Post) {
+    if (!confirm(`Excluir "${post.title}"? Esta ação não pode ser desfeita.`)) return;
+    setDeleting(post.id);
+    await fetch(`/api/sites/${siteId}/posts/${post.id}`, { method: "DELETE" });
+    await load();
+    setDeleting(null);
+  }
+
+  if (loading) return <div style={{ color: "#94a3b8", padding: "32px" }}>Carregando…</div>;
 
   return (
     <div style={{ maxWidth: "1200px" }}>
@@ -38,22 +80,11 @@ export default async function PostsListPage({ params, searchParams }: Props) {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "32px" }}>
         <div>
           <h1 style={{ fontSize: "1.75rem", fontWeight: 700, color: "#0f172a" }}>Blog</h1>
-          <p style={{ color: "#64748b", marginTop: "4px" }}>{site.name}</p>
+          {site && <p style={{ color: "#64748b", marginTop: "4px" }}>{site.name}</p>}
         </div>
         <Link
           href={`/app/sites/${siteId}/posts/new`}
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "8px",
-            padding: "10px 20px",
-            backgroundColor: "#6366f1",
-            color: "white",
-            borderRadius: "10px",
-            fontWeight: 500,
-            textDecoration: "none",
-            fontSize: "0.9375rem",
-          }}
+          style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "10px 20px", backgroundColor: "#6366f1", color: "white", borderRadius: "10px", fontWeight: 500, textDecoration: "none", fontSize: "0.9375rem" }}
         >
           <Plus size={16} /> Novo post
         </Link>
@@ -61,48 +92,15 @@ export default async function PostsListPage({ params, searchParams }: Props) {
 
       {/* Empty state */}
       {posts.length === 0 && (
-        <div
-          style={{
-            backgroundColor: "white",
-            border: "2px dashed #e2e8f0",
-            borderRadius: "16px",
-            padding: "64px 24px",
-            textAlign: "center",
-          }}
-        >
-          <div
-            style={{
-              width: "56px",
-              height: "56px",
-              borderRadius: "16px",
-              backgroundColor: "#ede9fe",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              margin: "0 auto 16px",
-            }}
-          >
+        <div style={{ backgroundColor: "white", border: "2px dashed #e2e8f0", borderRadius: "16px", padding: "64px 24px", textAlign: "center" }}>
+          <div style={{ width: "56px", height: "56px", borderRadius: "16px", backgroundColor: "#ede9fe", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
             <PenSquare size={28} color="#6366f1" />
           </div>
-          <h2 style={{ fontSize: "1.25rem", fontWeight: 600, color: "#0f172a", marginBottom: "8px" }}>
-            Nenhum post ainda
-          </h2>
-          <p style={{ color: "#64748b", marginBottom: "24px" }}>
-            Comece a escrever e publique conteúdo para o seu blog.
-          </p>
+          <h2 style={{ fontSize: "1.25rem", fontWeight: 600, color: "#0f172a", marginBottom: "8px" }}>Nenhum post ainda</h2>
+          <p style={{ color: "#64748b", marginBottom: "24px" }}>Comece a escrever e publique conteúdo para o seu blog.</p>
           <Link
             href={`/app/sites/${siteId}/posts/new`}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "8px",
-              padding: "10px 24px",
-              backgroundColor: "#6366f1",
-              color: "white",
-              borderRadius: "10px",
-              fontWeight: 500,
-              textDecoration: "none",
-            }}
+            style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "10px 24px", backgroundColor: "#6366f1", color: "white", borderRadius: "10px", fontWeight: 500, textDecoration: "none" }}
           >
             <Plus size={16} /> Criar primeiro post
           </Link>
@@ -126,18 +124,18 @@ export default async function PostsListPage({ params, searchParams }: Props) {
               <tbody>
                 {posts.map((post) => {
                   const badge = STATUS_BADGE[post.status] ?? { label: "Rascunho", color: "#92400e", bg: "#fef3c7" };
+                  const isToggling = toggling === post.id;
+                  const isDeleting = deleting === post.id;
+
                   return (
-                    <tr key={post.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
+                    <tr key={post.id} style={{ borderBottom: "1px solid #f1f5f9", opacity: isDeleting ? 0.4 : 1 }}>
                       <td style={tdStyle}>
-                        <Link
-                          href={`/app/sites/${siteId}/posts/${post.id}`}
-                          style={{ fontWeight: 500, color: "#0f172a", textDecoration: "none", fontSize: "0.9375rem" }}
-                        >
+                        <Link href={`/app/sites/${siteId}/posts/${post.id}`} style={{ fontWeight: 500, color: "#0f172a", textDecoration: "none", fontSize: "0.9375rem" }}>
                           {post.title}
                         </Link>
                         {post.excerpt && (
                           <p style={{ fontSize: "0.8125rem", color: "#64748b", marginTop: "2px" }}>
-                            {post.excerpt.slice(0, 80)}…
+                            {post.excerpt.slice(0, 80)}{post.excerpt.length > 80 ? "…" : ""}
                           </p>
                         )}
                       </td>
@@ -146,34 +144,50 @@ export default async function PostsListPage({ params, searchParams }: Props) {
                           {badge.label}
                         </span>
                       </td>
+                      <td style={{ ...tdStyle, color: "#64748b", fontSize: "0.875rem" }}>{post.author.name}</td>
                       <td style={{ ...tdStyle, color: "#64748b", fontSize: "0.875rem" }}>
-                        {post.author.name}
-                      </td>
-                      <td style={{ ...tdStyle, color: "#64748b", fontSize: "0.875rem" }}>
-                        {post.publishedAt
-                          ? new Intl.DateTimeFormat("pt-BR").format(post.publishedAt)
-                          : "—"}
+                        {post.publishedAt ? new Intl.DateTimeFormat("pt-BR").format(new Date(post.publishedAt)) : "—"}
                       </td>
                       <td style={{ ...tdStyle, textAlign: "right" }}>
                         <div style={{ display: "flex", gap: "6px", justifyContent: "flex-end" }}>
-                          <Link
-                            href={`/app/sites/${siteId}/posts/${post.id}`}
-                            title="Editar"
-                            style={actionBtnStyle}
+                          {/* Publish toggle */}
+                          <button
+                            onClick={() => { void togglePublish(post); }}
+                            disabled={isToggling}
+                            title={post.status === "PUBLISHED" ? "Despublicar" : "Publicar"}
+                            style={{
+                              ...actionBtnStyle,
+                              border: `1px solid ${post.status === "PUBLISHED" ? "#bbf7d0" : "#e2e8f0"}`,
+                              backgroundColor: post.status === "PUBLISHED" ? "#f0fdf4" : "white",
+                              color: post.status === "PUBLISHED" ? "#16a34a" : "#64748b",
+                              opacity: isToggling ? 0.5 : 1,
+                              cursor: isToggling ? "not-allowed" : "pointer",
+                            }}
                           >
+                            {post.status === "PUBLISHED" ? <EyeOff size={15} /> : <Globe size={15} />}
+                          </button>
+
+                          {/* Edit */}
+                          <Link href={`/app/sites/${siteId}/posts/${post.id}`} title="Editar" style={{ ...actionBtnStyle, textDecoration: "none" }}>
                             <Pencil size={15} />
                           </Link>
-                          {post.status === "PUBLISHED" && (
-                            <a
-                              href={`/s/${site.slug}/blog/${post.slug}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              title="Ver post"
-                              style={actionBtnStyle}
-                            >
+
+                          {/* View */}
+                          {post.status === "PUBLISHED" && site && (
+                            <a href={`/s/${site.slug}/blog/${post.slug}`} target="_blank" rel="noopener noreferrer" title="Ver post" style={{ ...actionBtnStyle, textDecoration: "none" }}>
                               <Eye size={15} />
                             </a>
                           )}
+
+                          {/* Delete */}
+                          <button
+                            onClick={() => { void handleDelete(post); }}
+                            disabled={isDeleting}
+                            title="Excluir"
+                            style={{ ...actionBtnStyle, border: "1px solid #fecaca", color: "#ef4444", backgroundColor: "white", cursor: isDeleting ? "not-allowed" : "pointer" }}
+                          >
+                            <Trash2 size={15} />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -187,21 +201,13 @@ export default async function PostsListPage({ params, searchParams }: Props) {
           {totalPages > 1 && (
             <div style={{ display: "flex", justifyContent: "center", gap: "8px", marginTop: "24px" }}>
               {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                <Link
+                <button
                   key={p}
-                  href={`/app/sites/${siteId}/posts?page=${p}`}
-                  style={{
-                    padding: "8px 12px",
-                    border: "1px solid #e2e8f0",
-                    borderRadius: "8px",
-                    backgroundColor: p === page ? "#6366f1" : "white",
-                    color: p === page ? "white" : "#334155",
-                    textDecoration: "none",
-                    fontSize: "0.875rem",
-                  }}
+                  onClick={() => router.push(`/app/sites/${siteId}/posts?page=${p}`)}
+                  style={{ padding: "8px 12px", border: "1px solid #e2e8f0", borderRadius: "8px", backgroundColor: p === page ? "#6366f1" : "white", color: p === page ? "white" : "#334155", fontSize: "0.875rem", cursor: "pointer" }}
                 >
                   {p}
-                </Link>
+                </button>
               ))}
             </div>
           )}
@@ -212,28 +218,14 @@ export default async function PostsListPage({ params, searchParams }: Props) {
 }
 
 const thStyle: React.CSSProperties = {
-  padding: "12px 16px",
-  textAlign: "left",
-  fontSize: "0.8125rem",
-  fontWeight: 600,
-  color: "#64748b",
-  textTransform: "uppercase",
-  letterSpacing: "0.04em",
+  padding: "12px 16px", textAlign: "left", fontSize: "0.8125rem",
+  fontWeight: 600, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.04em",
 };
 
-const tdStyle: React.CSSProperties = {
-  padding: "14px 16px",
-  verticalAlign: "middle",
-};
+const tdStyle: React.CSSProperties = { padding: "14px 16px", verticalAlign: "middle" };
 
 const actionBtnStyle: React.CSSProperties = {
-  display: "inline-flex",
-  alignItems: "center",
-  justifyContent: "center",
-  width: "32px",
-  height: "32px",
-  borderRadius: "8px",
-  border: "1px solid #e2e8f0",
-  color: "#64748b",
-  textDecoration: "none",
+  display: "inline-flex", alignItems: "center", justifyContent: "center",
+  width: "32px", height: "32px", borderRadius: "8px", border: "1px solid #e2e8f0",
+  color: "#64748b", backgroundColor: "white",
 };

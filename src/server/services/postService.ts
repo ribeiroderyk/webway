@@ -82,6 +82,13 @@ export async function publishPost(postId: string, siteId: string) {
   });
 }
 
+export async function unpublishPost(postId: string, siteId: string) {
+  return prisma.post.update({
+    where: { id: postId, siteId },
+    data: { status: "DRAFT" },
+  });
+}
+
 export async function deletePost(postId: string, siteId: string) {
   return prisma.post.delete({ where: { id: postId, siteId } });
 }

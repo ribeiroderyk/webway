@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Plus, FileText, Pencil, Eye, Globe, EyeOff } from "lucide-react";
+import { Plus, FileText, Pencil, Eye, Globe, EyeOff, Trash2 } from "lucide-react";
 
 interface Page {
   id: string;
@@ -30,6 +30,7 @@ export default function PagesListPage() {
   const [site, setSite] = useState<SiteInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [toggling, setToggling] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     const [pagesRes, siteRes] = await Promise.all([
@@ -47,13 +48,18 @@ export default function PagesListPage() {
 
   async function togglePublish(page: Page) {
     setToggling(page.id);
-    const endpoint = page.status === "PUBLISHED"
-      ? `/api/sites/${siteId}/pages/${page.id}/publish`
-      : `/api/sites/${siteId}/pages/${page.id}/publish`;
     const method = page.status === "PUBLISHED" ? "DELETE" : "POST";
-    await fetch(endpoint, { method });
+    await fetch(`/api/sites/${siteId}/pages/${page.id}/publish`, { method });
     await load();
     setToggling(null);
+  }
+
+  async function handleDelete(page: Page) {
+    if (!confirm(`Excluir "${page.title}"? Esta ação não pode ser desfeita.`)) return;
+    setDeleting(page.id);
+    await fetch(`/api/sites/${siteId}/pages/${page.id}`, { method: "DELETE" });
+    await load();
+    setDeleting(null);
   }
 
   if (loading) return <div style={{ color: "#94a3b8", padding: "32px" }}>Carregando…</div>;
@@ -114,8 +120,10 @@ export default function PagesListPage() {
                 const badge = STATUS_BADGE[page.status] ?? { label: "Rascunho", color: "#92400e", bg: "#fef3c7" };
                 const isToggling = toggling === page.id;
 
+                const isDeleting = deleting === page.id;
+
                 return (
-                  <tr key={page.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
+                  <tr key={page.id} style={{ borderBottom: "1px solid #f1f5f9", opacity: isDeleting ? 0.4 : 1 }}>
                     <td style={tdStyle}>
                       <Link
                         href={`/app/sites/${siteId}/pages/${page.id}/editor`}
@@ -187,6 +195,16 @@ export default function PagesListPage() {
                             <Eye size={15} />
                           </Link>
                         )}
+
+                        {/* Delete */}
+                        <button
+                          onClick={() => { void handleDelete(page); }}
+                          disabled={isDeleting}
+                          title="Excluir"
+                          style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: "32px", height: "32px", borderRadius: "8px", border: "1px solid #fecaca", color: "#ef4444", backgroundColor: "white", cursor: isDeleting ? "not-allowed" : "pointer" }}
+                        >
+                          <Trash2 size={15} />
+                        </button>
                       </div>
                     </td>
                   </tr>
