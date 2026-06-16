@@ -26,7 +26,7 @@ export async function createPage(siteId: string, input: CreatePageInput) {
       title: input.title,
       slug,
       status: "DRAFT",
-      blocks: (input.templateBlocks as Prisma.InputJsonValue) ?? [],
+      blocks: (input.templateBlocks as unknown as Prisma.InputJsonValue) ?? [],
     },
   });
 }
@@ -102,7 +102,7 @@ export async function saveBlocks(
   const page = await prisma.page.update({
     where: { id: pageId, siteId },
     data: {
-      blocks: blocks as Prisma.InputJsonValue,
+      blocks: blocks as unknown as Prisma.InputJsonValue,
       updatedAt: new Date(),
     },
   });
