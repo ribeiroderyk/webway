@@ -27,6 +27,7 @@ export default async function SeoPage({ params }: Props) {
       id: true, title: true, slug: true, status: true,
       seoTitle: true, seoDescription: true, blocks: true,
       seoScore: true, robotsIndex: true, updatedAt: true,
+      ogTitle: true, ogImageUrl: true,
     },
     orderBy: { updatedAt: "desc" },
   });
@@ -34,7 +35,7 @@ export default async function SeoPage({ params }: Props) {
   // Run live audit for pages without a cached score
   const audited = pages.map((page) => {
     const blocks = Array.isArray(page.blocks) ? page.blocks : [];
-    const audit = auditPageSeo(page as Parameters<typeof auditPageSeo>[0], blocks as Parameters<typeof auditPageSeo>[1]);
+    const audit = auditPageSeo(page, blocks as unknown as Parameters<typeof auditPageSeo>[1]);
     return { ...page, liveScore: audit.score, checks: audit.checks };
   });
 
