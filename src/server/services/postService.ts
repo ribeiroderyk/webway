@@ -70,9 +70,9 @@ export async function getPost(postId: string, siteId: string) {
 export async function updatePost(
   postId: string,
   siteId: string,
-  data: Prisma.PostUpdateInput
+  data: Record<string, unknown>
 ) {
-  return prisma.post.update({ where: { id: postId, siteId }, data });
+  return prisma.post.update({ where: { id: postId, siteId }, data: data as Prisma.PostUpdateInput });
 }
 
 export async function publishPost(postId: string, siteId: string) {
