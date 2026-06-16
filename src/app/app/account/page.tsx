@@ -98,7 +98,7 @@ function ProfileTab({ user, onUpdate }: { user: UserData; onUpdate: (u: UserData
     }
   }
 
-  const initials = name.split(" ").slice(0, 2).map((n) => n[0]).join("").toUpperCase();
+  const initials = name.split(" ").slice(0, 2).map((n) => n.charAt(0)).join("").toUpperCase();
 
   return (
     <Card title="Informações do perfil">

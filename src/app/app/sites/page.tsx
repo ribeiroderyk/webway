@@ -137,7 +137,7 @@ export default async function SitesPage() {
                       flexShrink: 0,
                     }}
                   >
-                    {site.name[0].toUpperCase()}
+                    {site.name.charAt(0).toUpperCase()}
                   </div>
                   <div>
                     <h2 style={{ fontSize: "1rem", fontWeight: 600, color: "#0f172a" }}>{site.name}</h2>

@@ -36,7 +36,7 @@ export function Topbar({ user, breadcrumbs }: TopbarProps) {
   const initials = user.name
     .split(" ")
     .slice(0, 2)
-    .map((n) => n[0])
+    .map((n) => n.charAt(0))
     .join("")
     .toUpperCase();
 

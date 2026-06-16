@@ -100,7 +100,7 @@ export function PageEditor({ site, page }: PageEditorProps) {
 
     const updated = [...blocks];
     const swapWith = direction === "up" ? index - 1 : index + 1;
-    [updated[index], updated[swapWith]] = [updated[swapWith], updated[index]];
+    [updated[index], updated[swapWith]] = [updated[swapWith]!, updated[index]!];
     markDirty(updated);
   }
 

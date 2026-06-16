@@ -387,7 +387,7 @@ function StatusBadge({ status }: { status: string }) {
     DRAFT: { label: "Rascunho", color: "#92400e", bg: "#fef3c7" },
     ARCHIVED: { label: "Arquivado", color: "#475569", bg: "#f1f5f9" },
   };
-  const c = config[status] ?? config.DRAFT;
+  const c = config[status] ?? { label: "Rascunho", color: "#92400e", bg: "#fef3c7" };
   return (
     <span style={{ fontSize: "0.8125rem", fontWeight: 500, color: c.color, backgroundColor: c.bg, padding: "3px 10px", borderRadius: "9999px" }}>
       {c.label}
