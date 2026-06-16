@@ -146,7 +146,7 @@ interface TiptapNode {
   attrs?: Record<string, unknown>;
   content?: TiptapNode[];
   text?: string;
-  marks?: Array<{ type: string }>;
+  marks?: Array<{ type: string; attrs?: Record<string, unknown> }>;
 }
 
 function TiptapNode({ node }: { node: TiptapNode }) {
@@ -155,25 +155,45 @@ function TiptapNode({ node }: { node: TiptapNode }) {
   ));
 
   switch (node.type) {
-    case "heading":
+    case "heading": {
       const level = (node.attrs?.level as number) ?? 2;
+      const sizes: Record<number, string> = { 1: "2rem", 2: "1.5rem", 3: "1.25rem" };
       const Tag = `h${level}` as keyof JSX.IntrinsicElements;
-      return <Tag style={{ marginTop: "24px", marginBottom: "12px", fontWeight: 700 }}>{children}</Tag>;
+      return <Tag style={{ marginTop: "28px", marginBottom: "12px", fontWeight: 700, fontSize: sizes[level] ?? "1.25rem" }}>{children}</Tag>;
+    }
     case "paragraph":
-      return <p style={{ marginBottom: "16px" }}>{children}</p>;
+      return <p style={{ marginBottom: "16px" }}>{children ?? null}</p>;
+    case "hardBreak":
+      return <br />;
     case "text": {
       let text: React.ReactNode = node.text ?? "";
-      if (node.marks?.some((m) => m.type === "bold")) {
-        text = <strong>{text}</strong>;
+      const marks = node.marks ?? [];
+      const linkMark = marks.find((m) => m.type === "link");
+      if (linkMark) {
+        text = (
+          <a href={linkMark.attrs?.href as string} target={linkMark.attrs?.target as string | undefined} rel="noopener noreferrer" style={{ color: "#6366f1", textDecoration: "underline" }}>
+            {text}
+          </a>
+        );
       }
-      if (node.marks?.some((m) => m.type === "italic")) {
-        text = <em>{text}</em>;
-      }
-      if (node.marks?.some((m) => m.type === "code")) {
-        text = <code style={{ backgroundColor: "#f1f5f9", padding: "2px 4px", borderRadius: "4px" }}>{text}</code>;
+      if (marks.some((m) => m.type === "bold")) text = <strong>{text}</strong>;
+      if (marks.some((m) => m.type === "italic")) text = <em>{text}</em>;
+      if (marks.some((m) => m.type === "underline")) text = <u>{text}</u>;
+      if (marks.some((m) => m.type === "strike")) text = <s>{text}</s>;
+      if (marks.some((m) => m.type === "code")) {
+        text = <code style={{ backgroundColor: "#f1f5f9", padding: "2px 5px", borderRadius: "4px", fontSize: "0.9em", fontFamily: "monospace" }}>{text}</code>;
       }
       return <>{text}</>;
     }
+    case "image":
+      return (
+        <img
+          src={node.attrs?.src as string}
+          alt={(node.attrs?.alt as string) ?? ""}
+          style={{ maxWidth: "100%", borderRadius: "8px", margin: "16px 0" }}
+          loading="lazy"
+        />
+      );
     case "bulletList":
       return <ul style={{ paddingLeft: "24px", marginBottom: "16px" }}>{children}</ul>;
     case "orderedList":
@@ -182,9 +202,15 @@ function TiptapNode({ node }: { node: TiptapNode }) {
       return <li style={{ marginBottom: "4px" }}>{children}</li>;
     case "blockquote":
       return (
-        <blockquote style={{ borderLeft: "4px solid #6366f1", paddingLeft: "16px", color: "#475569", fontStyle: "italic" }}>
+        <blockquote style={{ borderLeft: "4px solid #6366f1", paddingLeft: "16px", color: "#475569", fontStyle: "italic", margin: "24px 0" }}>
           {children}
         </blockquote>
+      );
+    case "codeBlock":
+      return (
+        <pre style={{ backgroundColor: "#0f172a", color: "#e2e8f0", padding: "20px", borderRadius: "10px", overflowX: "auto", margin: "24px 0", fontSize: "0.9rem", lineHeight: 1.6, fontFamily: "monospace" }}>
+          <code>{children}</code>
+        </pre>
       );
     case "horizontalRule":
       return <hr style={{ borderColor: "#e2e8f0", margin: "32px 0" }} />;
