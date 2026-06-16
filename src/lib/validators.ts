@@ -50,6 +50,7 @@ export const updateSiteSchema = createSiteSchema.partial().extend({
   timezone: z.string().optional(),
   status: z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]).optional(),
   googleSiteVerification: z.string().max(200).optional().nullable(),
+  customDomain: z.string().max(253).optional().nullable(),
 });
 
 // ── Pages ─────────────────────────────────────────────────────────

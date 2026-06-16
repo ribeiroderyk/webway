@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Plus, FileText, Pencil, Eye, Globe, EyeOff, Trash2 } from "lucide-react";
+import { Plus, FileText, Pencil, Eye, Globe, EyeOff, Trash2, Search } from "lucide-react";
 
 interface Page {
   id: string;
@@ -31,10 +31,12 @@ export default function PagesListPage() {
   const [loading, setLoading] = useState(true);
   const [toggling, setToggling] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (q = "") => {
+    const qs = q ? `&search=${encodeURIComponent(q)}` : "";
     const [pagesRes, siteRes] = await Promise.all([
-      fetch(`/api/sites/${siteId}/pages`),
+      fetch(`/api/sites/${siteId}/pages?perPage=100${qs}`),
       fetch(`/api/sites/${siteId}`),
     ]);
     const pagesJson = await pagesRes.json() as { data: { pages: Page[] } };
@@ -46,11 +48,16 @@ export default function PagesListPage() {
 
   useEffect(() => { void load(); }, [load]);
 
+  useEffect(() => {
+    const t = setTimeout(() => { void load(search); }, 300);
+    return () => clearTimeout(t);
+  }, [search, load]);
+
   async function togglePublish(page: Page) {
     setToggling(page.id);
     const method = page.status === "PUBLISHED" ? "DELETE" : "POST";
     await fetch(`/api/sites/${siteId}/pages/${page.id}/publish`, { method });
-    await load();
+    await load(search);
     setToggling(null);
   }
 
@@ -58,7 +65,7 @@ export default function PagesListPage() {
     if (!confirm(`Excluir "${page.title}"? Esta ação não pode ser desfeita.`)) return;
     setDeleting(page.id);
     await fetch(`/api/sites/${siteId}/pages/${page.id}`, { method: "DELETE" });
-    await load();
+    await load(search);
     setDeleting(null);
   }
 
@@ -84,8 +91,20 @@ export default function PagesListPage() {
         </Link>
       </div>
 
+      {/* Search */}
+      <div style={{ position: "relative", marginBottom: "20px", maxWidth: "360px" }}>
+        <Search size={16} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#94a3b8", pointerEvents: "none" }} />
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Buscar página…"
+          style={{ width: "100%", padding: "9px 12px 9px 36px", border: "1px solid #e2e8f0", borderRadius: "10px", fontSize: "0.9375rem", color: "#0f172a", outline: "none", boxSizing: "border-box", backgroundColor: "white" }}
+        />
+      </div>
+
       {/* Empty state */}
-      {pages.length === 0 && (
+      {pages.length === 0 && !search && (
         <div style={{ backgroundColor: "white", border: "2px dashed #e2e8f0", borderRadius: "16px", padding: "64px 24px", textAlign: "center" }}>
           <div style={{ width: "56px", height: "56px", borderRadius: "16px", backgroundColor: "#ede9fe", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
             <FileText size={28} color="#6366f1" />
@@ -99,6 +118,13 @@ export default function PagesListPage() {
             <Plus size={16} /> Criar primeira página
           </Link>
         </div>
+      )}
+
+      {/* No results */}
+      {pages.length === 0 && search && (
+        <p style={{ color: "#94a3b8", fontSize: "0.9375rem", padding: "16px 0" }}>
+          Nenhuma página encontrada para &ldquo;{search}&rdquo;.
+        </p>
       )}
 
       {/* Table */}

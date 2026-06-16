@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
-import { Plus, PenSquare, Pencil, Eye, Globe, EyeOff, Trash2 } from "lucide-react";
+import { Plus, PenSquare, Pencil, Eye, Globe, EyeOff, Trash2, Search } from "lucide-react";
 
 interface Post {
   id: string;
@@ -37,13 +37,15 @@ export default function PostsListPage() {
   const [loading, setLoading] = useState(true);
   const [toggling, setToggling] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
 
   const perPage = 20;
   const totalPages = Math.ceil(total / perPage);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (q = "") => {
+    const qs = q ? `&search=${encodeURIComponent(q)}` : "";
     const [postsRes, siteRes] = await Promise.all([
-      fetch(`/api/sites/${siteId}/posts?page=${page}&perPage=${perPage}`),
+      fetch(`/api/sites/${siteId}/posts?page=${page}&perPage=${perPage}${qs}`),
       fetch(`/api/sites/${siteId}`),
     ]);
     const postsJson = await postsRes.json() as { data: { posts: Post[]; total: number } };
@@ -56,11 +58,16 @@ export default function PostsListPage() {
 
   useEffect(() => { void load(); }, [load]);
 
+  useEffect(() => {
+    const t = setTimeout(() => { void load(search); }, 300);
+    return () => clearTimeout(t);
+  }, [search, load]);
+
   async function togglePublish(post: Post) {
     setToggling(post.id);
     const method = post.status === "PUBLISHED" ? "DELETE" : "POST";
     await fetch(`/api/sites/${siteId}/posts/${post.id}/publish`, { method });
-    await load();
+    await load(search);
     setToggling(null);
   }
 
@@ -68,7 +75,7 @@ export default function PostsListPage() {
     if (!confirm(`Excluir "${post.title}"? Esta ação não pode ser desfeita.`)) return;
     setDeleting(post.id);
     await fetch(`/api/sites/${siteId}/posts/${post.id}`, { method: "DELETE" });
-    await load();
+    await load(search);
     setDeleting(null);
   }
 
@@ -90,8 +97,20 @@ export default function PostsListPage() {
         </Link>
       </div>
 
+      {/* Search */}
+      <div style={{ position: "relative", marginBottom: "20px", maxWidth: "360px" }}>
+        <Search size={16} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#94a3b8", pointerEvents: "none" }} />
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Buscar post…"
+          style={{ width: "100%", padding: "9px 12px 9px 36px", border: "1px solid #e2e8f0", borderRadius: "10px", fontSize: "0.9375rem", color: "#0f172a", outline: "none", boxSizing: "border-box", backgroundColor: "white" }}
+        />
+      </div>
+
       {/* Empty state */}
-      {posts.length === 0 && (
+      {posts.length === 0 && !search && (
         <div style={{ backgroundColor: "white", border: "2px dashed #e2e8f0", borderRadius: "16px", padding: "64px 24px", textAlign: "center" }}>
           <div style={{ width: "56px", height: "56px", borderRadius: "16px", backgroundColor: "#ede9fe", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
             <PenSquare size={28} color="#6366f1" />
@@ -105,6 +124,13 @@ export default function PostsListPage() {
             <Plus size={16} /> Criar primeiro post
           </Link>
         </div>
+      )}
+
+      {/* No results */}
+      {posts.length === 0 && search && (
+        <p style={{ color: "#94a3b8", fontSize: "0.9375rem", padding: "16px 0" }}>
+          Nenhum post encontrado para &ldquo;{search}&rdquo;.
+        </p>
       )}
 
       {/* Table */}

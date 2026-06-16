@@ -16,8 +16,9 @@ export async function GET(
     const { searchParams } = new URL(request.url);
     const page = Number(searchParams.get("page") ?? 1);
     const perPage = Number(searchParams.get("perPage") ?? 20);
+    const search = searchParams.get("search") ?? undefined;
 
-    const result = await listPosts(siteId, { page, perPage });
+    const result = await listPosts(siteId, { page, perPage, search });
     return Response.json({ data: result });
   } catch (err) {
     return handleApiError(err);

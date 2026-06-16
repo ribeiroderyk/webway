@@ -16,6 +16,7 @@ interface SiteData {
   faviconUrl: string | null;
   status: string;
   googleSiteVerification: string | null;
+  customDomain: string | null;
 }
 
 type Tab = "general" | "appearance" | "advanced";
@@ -122,6 +123,20 @@ export default function SettingsPage() {
       {/* Advanced tab */}
       {tab === "advanced" && (
         <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+          {/* Custom domain */}
+          <FormCard title="Domínio personalizado">
+            <p style={{ fontSize: "0.875rem", color: "#64748b", marginBottom: "12px" }}>
+              Aponte seu domínio para este servidor via CNAME ou A record e informe o domínio aqui.
+            </p>
+            <FormRow label="Domínio">
+              <Input
+                defaultValue={site.customDomain ?? ""}
+                placeholder="meusite.com.br"
+                onBlur={(v) => handleSave({ customDomain: v || null })}
+              />
+            </FormRow>
+          </FormCard>
+
           {/* Google verification */}
           <FormCard title="Verificação Google Search Console">
             <p style={{ fontSize: "0.875rem", color: "#64748b", marginBottom: "12px" }}>
