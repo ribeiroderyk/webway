@@ -125,7 +125,7 @@ export default async function PostsListPage({ params, searchParams }: Props) {
               </thead>
               <tbody>
                 {posts.map((post) => {
-                  const badge = STATUS_BADGE[post.status] ?? STATUS_BADGE.DRAFT;
+                  const badge = STATUS_BADGE[post.status] ?? { label: "Rascunho", color: "#92400e", bg: "#fef3c7" };
                   return (
                     <tr key={post.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
                       <td style={tdStyle}>

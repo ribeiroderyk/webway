@@ -121,7 +121,7 @@ export default async function PagesListPage({ params }: Props) {
             </thead>
             <tbody>
               {pages.map((page) => {
-                const badge = STATUS_BADGE[page.status] ?? STATUS_BADGE.DRAFT;
+                const badge = STATUS_BADGE[page.status] ?? { label: "Rascunho", color: "#92400e", bg: "#fef3c7" };
                 const seoScore = (page as { seoScore?: number }).seoScore ?? null;
 
                 return (
